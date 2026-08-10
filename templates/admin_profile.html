@@ -1,0 +1,56 @@
+{% extends "admin_layout.html" %}
+
+{% block content %}
+
+
+<div class="container w-50 p-5 mt-5 rounded shadow-lg mybg">
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-danger" role="alert">
+        {{message}}
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+    <h1>User Profile</h1>
+    <form action="/admin_profile" method="post">
+        {% for r in record %}
+        <div class="row">
+            <div class="col">
+                <label for="">Email</label>
+                <div class="form-control">{{r[1]}}</div>
+            </div>
+
+            <div class="row">
+                <div class="col">
+                    <label for="">Name</label>
+                    <input class="form-control" type="text" name="name" value="{{r[0]}}">
+                </div>
+            </div>
+
+        </div>
+        <div class="row">
+            <div class="col">
+                <label for="">Mobile</label>
+                <input class="form-control" type="text" name="mobile" value="{{r[2]}}">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <label for="">city</label>
+                <input class="form-control" type="text" name="city" value="{{r[3]}}">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <button class="btn btn-danger mt-3" type="submit">Update Now</button>
+            </div>
+        </div>
+        {% endfor %}
+    </form>
+
+</div>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends "user_layout.html" %}
+
+{% block content %}
+<div class="container mybg mt-5 p-5 rounded">
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-danger" role="alert">
+        {{message}}
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+    <h1>Book your cleaning in 2 minutes! Register Now.. </h1>
+    <form action="/booking" method="post">
+        <div class="row">
+            <div class="col">
+                <label for="">Full Name<sup>*</sup></label>
+                <input name="name" class="form-control" type="text">
+            </div>
+            <div class="col">
+                <label for="">Email<sup>*</sup></label>
+                <input name="email" class="form-control" type="email">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <label for="">Contact<sup>*</sup></label>
+                <input name="contact" class="form-control" type="text">
+            </div>
+            <div class="col">
+                <label for="service" placeholder="services"> Services<sup>*</sup></label>
+                <select class="form-control" name="service" id="service">
+                    <option selected>Typa of services & Price</option>
+                    <option value="R">AC repairing Rs.2000</option>
+                    <option value="D">PC repairing Rs.3500</option>
+                    <option value="O">Salon Rs.1000</option>
+                    <option value="C">Plumber Rs.500</option>
+                    <option value="p">Painting Rs.1000</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <label for="address">Full Address<sup>*</sup></label>
+                <textarea name="address" id="address" class="form-control" type="address"></textarea>
+            </div>
+            <div class="col">
+                <label for="landmark">LandMark<sup>*</sup></label>
+                <textarea name="landmark" id="landmark" class="form-control" type="landmark"></textarea>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <button class="btn btn-success mt-3" type="submit">Confirm</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

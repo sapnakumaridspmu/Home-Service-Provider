@@ -1,0 +1,76 @@
+{% extends "user_layout.html" %}
+
+{% block content %}
+
+<div class="container mybg mt-5 p-5 rounded">
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-danger" role="alert">
+        {{message}}
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+    <h1>Book your cleaning in 2 minutes! Register Now.. </h1>
+    <form action="/booking" method="post">
+        <div class="row">
+            <div class="col">
+                <label for="">Full Name<sup>*</sup></label>
+                <input name="name" class="form-control" type="text">
+            </div>
+            <div class="col">
+                <label for="">Email<sup>*</sup></label>
+                <input name="name" class="form-control" type="text">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <label for="">Contact<sup>*</sup></label>
+                <input name="email" class="form-control" type="email">
+            </div>
+            <div class="col">
+                <label for="service"> Services<sup>*</sup></label>
+                <select class="form-control" name="service" id="service">
+                    <option selected>Type of Services</option>
+                    <option value="R">Regular Cleaning</option>
+                    <option value="D">Deep Cleaning</option>
+                    <option value="O">One-time Cleaning</option>
+                    <option value="C">Commercial Cleaning</option>
+                    <option value="p">painting</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <label for="address">Full Address<sup>*</sup></label>
+                <textarea name="address" id="address" class="form-control" type="address"></textarea>
+            </div>
+            <div class="col">
+                <label for="landmark">LandMark<sup>*</sup></label>
+                <textarea name="landmark" id="landmark" class="form-control" type="landmark"></textarea>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <label for="">Password</label>
+                <input type="password" name="password" class="form-control" type="password">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <label for="">confirm password</label>
+                <input name="password" class="form-control" type="password">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <button class="btn btn-success mt-3" type="submit">Register Now</button>
+            </div>
+        </div>
+    </form>
+    <span>Already Register? <a class="text-light" href="/user_login">Login Now</a></span>
+</div>
+
+{% endblock %}
