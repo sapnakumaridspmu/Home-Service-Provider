@@ -18,7 +18,4 @@ class Validation:
         if(not data.isalpha()):
             return True
 
-    def checkMobileLength(self,data):
-        length = len(data) 
-        if(length!=10):
-            return True               
+                  
