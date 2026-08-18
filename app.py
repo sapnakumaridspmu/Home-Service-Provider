@@ -7,7 +7,7 @@ from admin import OrgOperation
 
 
 app=Flask(__name__)        
-app.secret_key = os.environ.get("SECRET_KEY")                       # object of flask class server, routing
+app.secret_key = os.environ.get("SECRET_KEY", "home-service-secret-key")                       # object of flask class server, routing
 # app.secret_key="ghijklmnopqrstfghuy45lklk"    #any value you can put here                                        
 
 userObj = UserOperation()                                               #object for user   --ab ese clll karna hoga
@@ -170,7 +170,7 @@ def booking():
                return redirect(url_for('booking'))
      else:
           flash("Please login to access this page..") 
-          return redirect(url_for('org_login')) 
+          return redirect(url_for('user_login')) 
 
 
 @app.route('/admin_signup',methods=['GET','POST'])
@@ -256,7 +256,8 @@ def admin_profile():
                flash("Mobile must be a number with length of 10 digits!!")
                return redirect(url_for('admin_profile'))
           #-------- end validation------------------------
-          orgObj.admin_profile_update(name,mobile)
+          city=request.form['city']
+          orgObj.admin_profile_update(name,mobile,city)
           flash("your profile is updated successfully!!")
           return redirect(url_for('admin_profile'))         
      else:
