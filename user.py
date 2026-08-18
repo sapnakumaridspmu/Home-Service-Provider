@@ -1,15 +1,16 @@
-import mysql.connector
+import os
+import psycopg2
 from flask import session
 
 class UserOperation:
     def connection(self):
-        con=mysql.connector.connect(host="localhost",port="3306",user="root",password="",database="homeservice")
-        return con
+    con = psycopg2.connect(os.getenv("DATABASE_URL"))
+    return con
 
     def user_signup(self,name,email,mobile,password):
         db=self.connection()
         mycursor=db.cursor()
-        sq="insert into user (name,email,mobile,password) values(%s,%s,%s,%s)"
+        sq="insert into "user" (name,email,mobile,password) values(%s,%s,%s,%s)"
         record=[name,email,mobile,password]
         mycursor.execute(sq,record)
         db.commit()
@@ -20,7 +21,7 @@ class UserOperation:
     def user_login(self,email,password):
         db=self.connection()
         mycursor=db.cursor()
-        sq="select name,email from user where email=%s and password=%s"
+        sq="select name,email from "user" where email=%s and password=%s"
         record=[email,password]
         mycursor.execute(sq,record)
         row = mycursor.fetchall()
@@ -32,7 +33,7 @@ class UserOperation:
     def user_profile(self):
         db=self.connection()
         mycursor=db.cursor()
-        sq="select name,email,mobile from user where email=%s"
+        sq="select name,email,mobile from "user" where email=%s"
         record=[session['email']]
         mycursor.execute(sq,record)
         record = mycursor.fetchall()
@@ -43,7 +44,7 @@ class UserOperation:
     def user_profile_update(self,name,mobile):
         db=self.connection()
         mycursor=db.cursor()
-        sq="update user set name=%s,mobile=%s where email=%s"
+        sq="update "user" set name=%s,mobile=%s where email=%s"
         record=[name,mobile,session['email']]
         mycursor.execute(sq,record)
         db.commit()
@@ -54,7 +55,7 @@ class UserOperation:
     def user_delete(self):
         db=self.connection()
         mycursor=db.cursor()
-        sq="delete from user where email=%s"
+        sq="delete from "user" where email=%s"
         record=[session['email']]
         mycursor.execute(sq,record)
         db.commit()
