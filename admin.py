@@ -1,165 +1,214 @@
-import mysql.connector
+import os
+import psycopg2
 from flask import session
 
 
 class OrgOperation:
+
     def connection(self):
-        con=mysql.connector.connect(host="localhost",port="3306",user="root",password="",database="homeservice")
+        con = psycopg2.connect(os.getenv("DATABASE_URL"))
         return con
 
-    def admin_signup(self,name,email,mobile,city,password):
-        db=self.connection()
-        mycursor=db.cursor()
-        sq="insert into admin(name,email,mobile,city,password) values(%s,%s,%s,%s,%s)"
-        record=[name,email,mobile,city,password]  
-        mycursor.execute(sq,record)
-        db.commit()
-        mycursor.close()
-        db.close()
-        return 
+    def admin_signup(self, name, email, mobile, city, password):
+        db = self.connection()
+        mycursor = db.cursor()
 
-    def admin_login(self,email,password):
-        db=self.connection()
-        mycursor=db.cursor()
-        sq="select name,email from admin where email=%s and password=%s"
-        record=[email,password]
-        mycursor.execute(sq,record)
+        sq = 'INSERT INTO admin (name, email, mobile, city, password) VALUES (%s, %s, %s, %s, %s)'
+        record = [name, email, mobile, city, password]
+
+        mycursor.execute(sq, record)
+        db.commit()
+
+        mycursor.close()
+        db.close()
+
+    def admin_login(self, email, password):
+        db = self.connection()
+        mycursor = db.cursor()
+
+        sq = 'SELECT name, email FROM admin WHERE email=%s AND password=%s'
+        record = [email, password]
+
+        mycursor.execute(sq, record)
         row = mycursor.fetchall()
-        # count = mycursor.rowcount  #number of record
+
         mycursor.close()
         db.close()
+
         return row
-    
+
     def admin_profile(self):
-        db=self.connection()
-        mycursor=db.cursor()
-        sq="select name,email,mobile,city from admin where email=%s"
-        record=[session['admin_email']]
-        mycursor.execute(sq,record)
+        db = self.connection()
+        mycursor = db.cursor()
+
+        sq = 'SELECT name, email, mobile, city FROM admin WHERE email=%s'
+        record = [session['admin_email']]
+
+        mycursor.execute(sq, record)
         record = mycursor.fetchall()
+
         mycursor.close()
         db.close()
+
         return record
 
-    def admin_profile_update(self,name,mobile,city):
-        db=self.connection()
-        mycursor=db.cursor()
-        sq="update admin set name=%s,mobile=%s,city=%s where email=%s"
-        record=[name,mobile,session['admin_email']]
-        mycursor.execute(sq,record)
+    def admin_profile_update(self, name, mobile, city):
+        db = self.connection()
+        mycursor = db.cursor()
+
+        sq = 'UPDATE admin SET name=%s, mobile=%s, city=%s WHERE email=%s'
+        record = [name, mobile, city, session['admin_email']]
+
+        mycursor.execute(sq, record)
         db.commit()
+
         mycursor.close()
         db.close()
-        return 
- #_____________________________
 
     def org_delete(self):
-        db=self.connection()
-        mycursor=db.cursor()
-        sq="delete from user where email=%s"
-        record=[session['org_email']]
-        mycursor.execute(sq,record)
+        db = self.connection()
+        mycursor = db.cursor()
+
+        sq = 'DELETE FROM "user" WHERE email=%s'
+        record = [session['org_email']]
+
+        mycursor.execute(sq, record)
         db.commit()
+
         mycursor.close()
         db.close()
-        return 
 
-    def org_change_password(self,oldPassword,newPassword):
-        db=self.connection()
-        mycursor=db.cursor()
-        sq="select * from user where email=%s and password=%s"
-        record=[session['org_Email'],oldPassword]
-        mycursor.execute(sq,record) 
-        row=mycursor.fetchall()
-        rc = mycursor.rowcount
-        if(rc==0):
+    def org_change_password(self, oldPassword, newPassword):
+        db = self.connection()
+        mycursor = db.cursor()
+
+        sq = 'SELECT * FROM "user" WHERE email=%s AND password=%s'
+        record = [session['org_email'], oldPassword]
+
+        mycursor.execute(sq, record)
+        row = mycursor.fetchall()
+
+        if len(row) == 0:
+            mycursor.close()
+            db.close()
             return 0
 
-        sq="update organiser set password=%s where email=%s"
-        record=[newPassword,session['org_email']]
-        mycursor.execute(sq,record)
-        db.commit()
-        mycursor.close()
-        db.close()
-        return 1       
+        sq = 'UPDATE admin SET password=%s WHERE email=%s'
+        record = [newPassword, session['org_email']]
 
-        # ___________________________
-        # __________________________
-    def org_new_camp(self,campName,contact,city,location,startDate,endDate,charges,descp):
-        db=self.connection()
-        mycursor=db.cursor()
-        sq="insert into camp (orgEmail,campName,contact,city,location,startDate,endDate,charges,descp) values(%s,%s,%s,%s,%s,%s,%s,%s,%s)"
-        record=[session['org_email'],campName,contact,city,location,startDate,endDate,charges,descp] 
-        mycursor.execute(sq,record)  
+        mycursor.execute(sq, record)
         db.commit()
+
         mycursor.close()
         db.close()
-        return    
+
+        return 1
+
+    def org_new_camp(self, campName, contact, city, location, startDate, endDate, charges, descp):
+        db = self.connection()
+        mycursor = db.cursor()
+
+        sq = 'INSERT INTO camp (orgEmail, campName, contact, city, location, startDate, endDate, charges, descp) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)'
+        record = [
+            session['org_email'],
+            campName,
+            contact,
+            city,
+            location,
+            startDate,
+            endDate,
+            charges,
+            descp
+        ]
+
+        mycursor.execute(sq, record)
+        db.commit()
+
+        mycursor.close()
+        db.close()
 
     def org_view_camp(self):
-        db=self.connection()
-        mycursor=db.cursor()
-        sq="select campID,campName,city,location,charges from camp where orgEmail=%s" 
-        record=[session['org_email']]  
-        mycursor.execute(sq,record)
-        record=mycursor.fetchall()
-        mycursor.close()
-        db.close()
-        return record
+        db = self.connection()
+        mycursor = db.cursor()
 
-    def org_camp_delete(self,campID):
-        db=self.connection()
-        mycursor=db.cursor()
-        sq="delete from camp where campID=%s" 
-        record=[campID] 
-        mycursor.execute(sq,record)
-        db.commit()
-        mycursor.close()
-        db.close()
-        return         
+        sq = 'SELECT campID, campName, city, location, charges FROM camp WHERE orgEmail=%s'
+        record = [session['org_email']]
 
-    def org_camp_detail(self,campID):
-        db=self.connection()
-        mycursor=db.cursor()
-        sq="select campName,contact,city,location,startDate,endDate,charges,descp,campID from camp where campID=%s"   
-        record=[campID]
-        mycursor.execute(sq,record)
+        mycursor.execute(sq, record)
         record = mycursor.fetchall()
+
         mycursor.close()
         db.close()
+
         return record
 
-    def org_camp_edit(self,campID,campName,contact,city,location,startDate,endDate,charges,descp):
-        db=self.connection()
-        mycursor=db.cursor()
-        sq="update camp set campName=%s,contact=%s,city=%s,location=%s,startDate=%s,endDate=%s,charges=%s,descp=%s where campID=%s"   
-        record=[campName,contact,city,location,startDate,endDate,charges,descp,campID]
-        mycursor.execute(sq,record)
+    def org_camp_delete(self, campID):
+        db = self.connection()
+        mycursor = db.cursor()
+
+        sq = 'DELETE FROM camp WHERE campID=%s'
+        mycursor.execute(sq, [campID])
         db.commit()
+
         mycursor.close()
         db.close()
-        return       
 
+    def org_camp_detail(self, campID):
+        db = self.connection()
+        mycursor = db.cursor()
 
-    def org_camp_photo(self,campID,path):
-        db=self.connection()
-        mycursor=db.cursor()
-        sq="insert into camp_photo (campID,path) values(%s,%s)" 
-        record=[campID,path]   
-        mycursor.execute(sq,record)
-        db.commit()
-        mycursor.close()
-        db.close()
-        return
-
-    def org_camp_photo_view(self,campID):
-        db=self.connection()
-        mycursor=db.cursor()
-        sq="select path from camp_photo where campID=%s"
-        record=[campID]
-        mycursor.execute(sq,record)
+        sq = 'SELECT campName, contact, city, location, startDate, endDate, charges, descp, campID FROM camp WHERE campID=%s'
+        mycursor.execute(sq, [campID])
         record = mycursor.fetchall()
+
         mycursor.close()
         db.close()
+
         return record
-   
+
+    def org_camp_edit(self, campID, campName, contact, city, location, startDate, endDate, charges, descp):
+        db = self.connection()
+        mycursor = db.cursor()
+
+        sq = 'UPDATE camp SET campName=%s, contact=%s, city=%s, location=%s, startDate=%s, endDate=%s, charges=%s, descp=%s WHERE campID=%s'
+        record = [
+            campName,
+            contact,
+            city,
+            location,
+            startDate,
+            endDate,
+            charges,
+            descp,
+            campID
+        ]
+
+        mycursor.execute(sq, record)
+        db.commit()
+
+        mycursor.close()
+        db.close()
+
+    def org_camp_photo(self, campID, path):
+        db = self.connection()
+        mycursor = db.cursor()
+
+        sq = 'INSERT INTO camp_photo (campID, path) VALUES (%s, %s)'
+        mycursor.execute(sq, [campID, path])
+        db.commit()
+
+        mycursor.close()
+        db.close()
+
+    def org_camp_photo_view(self, campID):
+        db = self.connection()
+        mycursor = db.cursor()
+
+        sq = 'SELECT path FROM camp_photo WHERE campID=%s'
+        mycursor.execute(sq, [campID])
+        record = mycursor.fetchall()
+
+        mycursor.close()
+        db.close()
+
+        return record
