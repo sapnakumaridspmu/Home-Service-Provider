@@ -69,7 +69,7 @@ class OrgOperation:
         db = self.connection()
         mycursor = db.cursor()
 
-        sq = 'DELETE FROM "user" WHERE email=%s'
+        sq = 'DELETE FROM admin WHERE email=%s'
         record = [session['org_email']]
 
         mycursor.execute(sq, record)
@@ -82,7 +82,7 @@ class OrgOperation:
         db = self.connection()
         mycursor = db.cursor()
 
-        sq = 'SELECT * FROM "user" WHERE email=%s AND password=%s'
+        sq = 'SELECT * FROM admin WHERE email=%s AND password=%s'
         record = [session['org_email'], oldPassword]
 
         mycursor.execute(sq, record)
