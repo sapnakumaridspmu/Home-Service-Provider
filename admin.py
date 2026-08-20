@@ -1,214 +1,84 @@
-import os
-import psycopg2
+import sqlite3
 from flask import session
+from db import get_connection
 
 
 class OrgOperation:
 
-    def connection(self):
-        con = psycopg2.connect(os.getenv("DATABASE_URL"))
-        return con
-
     def admin_signup(self, name, email, mobile, city, password):
-        db = self.connection()
+        db = get_connection()
         mycursor = db.cursor()
-
-        sq = 'INSERT INTO admin (name, email, mobile, city, password) VALUES (%s, %s, %s, %s, %s)'
+        sq = "insert into admin(name,email,mobile,city,password) values(?,?,?,?,?)"
         record = [name, email, mobile, city, password]
+        try:
+            mycursor.execute(sq, record)
+            db.commit()
+            return True
+        except sqlite3.IntegrityError:
+            return False
+        finally:
+            mycursor.close()
+            db.close()
 
-        mycursor.execute(sq, record)
-        db.commit()
-
-        mycursor.close()
-        db.close()
-
-    def admin_login(self, email, password):
-        db = self.connection()
+    def admin_login(self, email):
+        db = get_connection()
         mycursor = db.cursor()
-
-        sq = 'SELECT name, email FROM admin WHERE email=%s AND password=%s'
-        record = [email, password]
-
+        sq = "select name,email,password from admin where email=?"
+        record = [email]
         mycursor.execute(sq, record)
         row = mycursor.fetchall()
-
         mycursor.close()
         db.close()
-
         return row
 
     def admin_profile(self):
-        db = self.connection()
+        db = get_connection()
         mycursor = db.cursor()
-
-        sq = 'SELECT name, email, mobile, city FROM admin WHERE email=%s'
+        sq = "select name,email,mobile,city from admin where email=?"
         record = [session['admin_email']]
-
         mycursor.execute(sq, record)
         record = mycursor.fetchall()
-
         mycursor.close()
         db.close()
-
         return record
 
     def admin_profile_update(self, name, mobile, city):
-        db = self.connection()
+        db = get_connection()
         mycursor = db.cursor()
-
-        sq = 'UPDATE admin SET name=%s, mobile=%s, city=%s WHERE email=%s'
+        sq = "update admin set name=?,mobile=?,city=? where email=?"
         record = [name, mobile, city, session['admin_email']]
-
         mycursor.execute(sq, record)
         db.commit()
-
         mycursor.close()
         db.close()
+        return
 
-    def org_delete(self):
-        db = self.connection()
+    def admin_reset_password(self, email, mobile, new_password):
+        db = get_connection()
         mycursor = db.cursor()
-
-        sq = 'DELETE FROM admin WHERE email=%s'
-        record = [session['org_email']]
-
-        mycursor.execute(sq, record)
-        db.commit()
-
-        mycursor.close()
-        db.close()
-
-    def org_change_password(self, oldPassword, newPassword):
-        db = self.connection()
-        mycursor = db.cursor()
-
-        sq = 'SELECT * FROM admin WHERE email=%s AND password=%s'
-        record = [session['org_email'], oldPassword]
-
-        mycursor.execute(sq, record)
+        # verify email+mobile match an existing account before allowing reset
+        sq = "select id from admin where email=? and mobile=?"
+        mycursor.execute(sq, [email, mobile])
         row = mycursor.fetchall()
-
-        if len(row) == 0:
+        if not row:
             mycursor.close()
             db.close()
-            return 0
+            return False
 
-        sq = 'UPDATE admin SET password=%s WHERE email=%s'
-        record = [newPassword, session['org_email']]
+        sq = "update admin set password=? where email=?"
+        mycursor.execute(sq, [new_password, email])
+        db.commit()
+        mycursor.close()
+        db.close()
+        return True
 
+    def admin_delete(self):
+        db = get_connection()
+        mycursor = db.cursor()
+        sq = "delete from admin where email=?"
+        record = [session['admin_email']]
         mycursor.execute(sq, record)
         db.commit()
-
         mycursor.close()
         db.close()
-
-        return 1
-
-    def org_new_camp(self, campName, contact, city, location, startDate, endDate, charges, descp):
-        db = self.connection()
-        mycursor = db.cursor()
-
-        sq = 'INSERT INTO camp (orgEmail, campName, contact, city, location, startDate, endDate, charges, descp) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)'
-        record = [
-            session['org_email'],
-            campName,
-            contact,
-            city,
-            location,
-            startDate,
-            endDate,
-            charges,
-            descp
-        ]
-
-        mycursor.execute(sq, record)
-        db.commit()
-
-        mycursor.close()
-        db.close()
-
-    def org_view_camp(self):
-        db = self.connection()
-        mycursor = db.cursor()
-
-        sq = 'SELECT campID, campName, city, location, charges FROM camp WHERE orgEmail=%s'
-        record = [session['org_email']]
-
-        mycursor.execute(sq, record)
-        record = mycursor.fetchall()
-
-        mycursor.close()
-        db.close()
-
-        return record
-
-    def org_camp_delete(self, campID):
-        db = self.connection()
-        mycursor = db.cursor()
-
-        sq = 'DELETE FROM camp WHERE campID=%s'
-        mycursor.execute(sq, [campID])
-        db.commit()
-
-        mycursor.close()
-        db.close()
-
-    def org_camp_detail(self, campID):
-        db = self.connection()
-        mycursor = db.cursor()
-
-        sq = 'SELECT campName, contact, city, location, startDate, endDate, charges, descp, campID FROM camp WHERE campID=%s'
-        mycursor.execute(sq, [campID])
-        record = mycursor.fetchall()
-
-        mycursor.close()
-        db.close()
-
-        return record
-
-    def org_camp_edit(self, campID, campName, contact, city, location, startDate, endDate, charges, descp):
-        db = self.connection()
-        mycursor = db.cursor()
-
-        sq = 'UPDATE camp SET campName=%s, contact=%s, city=%s, location=%s, startDate=%s, endDate=%s, charges=%s, descp=%s WHERE campID=%s'
-        record = [
-            campName,
-            contact,
-            city,
-            location,
-            startDate,
-            endDate,
-            charges,
-            descp,
-            campID
-        ]
-
-        mycursor.execute(sq, record)
-        db.commit()
-
-        mycursor.close()
-        db.close()
-
-    def org_camp_photo(self, campID, path):
-        db = self.connection()
-        mycursor = db.cursor()
-
-        sq = 'INSERT INTO camp_photo (campID, path) VALUES (%s, %s)'
-        mycursor.execute(sq, [campID, path])
-        db.commit()
-
-        mycursor.close()
-        db.close()
-
-    def org_camp_photo_view(self, campID):
-        db = self.connection()
-        mycursor = db.cursor()
-
-        sq = 'SELECT path FROM camp_photo WHERE campID=%s'
-        mycursor.execute(sq, [campID])
-        record = mycursor.fetchall()
-
-        mycursor.close()
-        db.close()
-
-        return record
+        return

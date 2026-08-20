@@ -42,5 +42,54 @@
         {% endfor %}
     </form>
 
+    <hr class="mt-4">
+    <h2 class="mt-4">My Bookings</h2>
+    <table class="table table-striped table-bordered mt-3">
+        <thead>
+            <tr>
+                <th>Service</th>
+                <th>Address</th>
+                <th>Landmark</th>
+                <th>Contact</th>
+                <th>Status</th>
+                <th>Booked On</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for b in bookings %}
+            <tr>
+                <td>{{ b[1] }}</td>
+                <td>{{ b[2] }}</td>
+                <td>{{ b[3] }}</td>
+                <td>{{ b[4] }}</td>
+                <td>
+                    {% if b[5] == 'Pending' %}
+                    <span class="badge bg-warning text-dark">Pending</span>
+                    {% elif b[5] == 'Accepted' %}
+                    <span class="badge bg-info text-dark">Accepted</span>
+                    {% elif b[5] == 'Completed' %}
+                    <span class="badge bg-success">Completed</span>
+                    {% else %}
+                    <span class="badge bg-secondary">{{ b[5] }}</span>
+                    {% endif %}
+                </td>
+                <td>{{ b[6] }}</td>
+                <td>
+                    {% if b[5] == 'Pending' %}
+                    <form action="/cancel_booking/{{ b[0] }}" method="post" onsubmit="return confirm('Cancel this booking?');">
+                        <button type="submit" class="btn btn-sm btn-outline-danger">Cancel</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7" class="text-center">You haven't booked any service yet.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
 </div>
 {% endblock %}
