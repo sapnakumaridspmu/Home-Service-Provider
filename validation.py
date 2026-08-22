@@ -10,7 +10,12 @@ class Validation:
             return True
 
     def checkAlpha(self,data):
-        if(not data.isalpha()):
+        # Allow letters and single spaces (for full names like "Hello World"),
+        # but not digits or symbols. Reject empty/whitespace-only names too.
+        stripped = data.strip()
+        if stripped == '':
+            return True
+        if not stripped.replace(' ', '').isalpha():
             return True
 
     def checkMobileLength(self,data):
